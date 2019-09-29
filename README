@@ -1,0 +1,77 @@
+= Starling & Monzo simple transaction mirrors =
+
+The most important job of a bank is to record account transactions with
+near-absolute accuracy. Every penny in and every penny out should be
+justified. Everything else that a bank offers, such as competitive
+interest rates, desirable and innovative products, and a good human
+experience, is fluff on top of that fundamental requirement of a highly
+consistent database with completely correct accounting. Here I am
+concerned only with that fundamental requirement.
+
+Traditional banks issue monthly statements and give them to their
+customers to serve as the definitive record of what transactions are
+posted to the account and where the money comes from and where it has
+gone to. Those have never been great, because of the latency of up to
+a month before the record is published, and because they don't contain
+all of the details of the transactions. But they came about before we
+had easy technology to do much better, and they serve acceptably.
+
+Challenger banks don't issue statements. Well, you can download so-called
+statements but they don't get issued automatically, and I have observed
+(for at least one bank, but I believe it's true for more than one) that
+these aren't immutable after they are produced. Those properties are in
+opposition to the statement's purpose as a proof of definitive record.
+
+But the challenger banks have APIs instead. And with an API you can
+solve both the problems with traditional statements: you can inspect
+the record whenever you like, and you get access to a much richer
+schema including full transaction details. The bank still doesn't
+produce this official transaction record on its own but, hey, it's a
+API, so you can cron it to ask the bank do it as often as you like.
+
+This is very simple software that replaces bank statements with a
+your own local copy of the full transaction record, downloaded from
+the bank's API.
+
+Starling and Monzo both have a data model where an account contains
+transactions, and the transactions each have many properties such as
+the timestamp, amount, type of transaction, and remote party
+identification. But what they don't model in their APIs is the
+history of each transaction, or how its properties have changed over
+time. Some property changes are expected, such as a transaction
+changing from the pending state to the settled state. To track that
+as best we can, we check the full database of transactions into a
+git repository every time the script runs and downloads it. So if
+the same transaction (identified by its primary key) changes from
+one run to another, the file corresponding to that transaction will
+have a change history in the git repo.
+
+What can we do with this? Not much that's all that exciting, really.
+We can't detect for example if the bank posts a completely bogus
+transaction to the account since we have no way of knowing that any
+given thing that appears on the account wasn't legitimately initiated
+by the user or whatever. But at least we can check a few invariants
+like:
+
+- No transaction is future-dated
+- No transaction is back-dated (relies on the cron job successfully
+executing with enough frequency)
+- No fields ever change in an already-posted transaction that really
+should be immutable, such as the remote party's bank details.
+- Transactions don't take unacceptably long to settle (since the
+merchant can change the amount of any transaction that is still
+pending, you don't want it to remain in that state for an
+unreasonably long time.
+- etc...
+
+We perform all those checks in a separate script which scans the
+whole git repo after the downloader script has updated it.
+
+Who should run this, given that it doesn't really do any exciting and
+fancy things like integrate the bank APIs with other service providers
+or somesuch? I think of it as similar to code auditing in open source
+software. Nobody audits all of the source code (for malicious code or
+trojans) for the software they run: even if you had the expertise you
+don't have the time, and most people don't even have the expertise
+anyway. But even a very small number of people doing it (or even just
+potentially doing it?) is probably enough to keep the authors honest.

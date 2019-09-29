@@ -1,0 +1,86 @@
+1. Create scripts in a bin/ directory of some kind:
+
+update-starling
+
+```
+#!/usr/bin/python
+
+import sys
+sys.path.insert(0, "/location/of/this/code")
+import starling.fetch
+starling.fetch.main()
+```
+
+update-monzo
+
+```
+#!/usr/bin/python
+
+import sys
+sys.path.insert(0, "/location/of/this/code")
+import monzo.fetch
+monzo.fetch.main()
+```
+
+2. Create work directories.
+
+   The code as written assumes ~/projects/starling and ~/projects/monzo but
+   those paths are mentioned in exactly one place each (2 for Monzo) and
+   could be changed.
+
+   # The other that runs the cron job should be able to write to this dir.
+   mkdir ~/projects/{starling,monzo}
+   for bank in starling monzo; do
+     cd ~/projects/${bank}
+
+     # Create a checked-out (non-bare) git repo called work. This "work" copy
+     # of the repo should be treated as private to the transaction downloader
+     # script as the script will assume it can "git clean" it and write all
+     # its work there.
+     git init work
+     cd work
+
+     # Designate a place where the downloader script will push its new
+     # commits after it makes them. The downloader script must be able to
+     # push to this repo unattended, so use a local disk path or remote repo
+     # with a passwordless SSH key.
+     #
+     # DON'T USE SOMETHING PUBLIC LIKE GITHUB SINCE YOUR PERSONAL FINANCIAL
+     # DATA IS IN THERE.
+     git remote add origin /some/other/path.git
+   done
+
+3a (Starling). Register an API token
+
+   Get an API token. The token need only have read-only access to download
+   transactinons through the API. Write it to ~/.starling_token
+   Be sure to protect the permissions of that file.
+
+3b (Monzo). Register with oauth
+
+   Oh *sigh*, you have to do this even just for personal use.
+
+   Make another script "monzo-oauth" in some bin/ direcory:
+
+```
+#!/usr/bin/python
+
+import sys
+sys.path.insert(0, "/location/of/this/code")
+import monzo.oauth
+monzo.oauth.main()
+```
+
+   Fill in your client ID in monzo/oauth.py
+   TODO: Describe the oauth dance.
+   Then put the secret in ~/.monzo_secret
+
+   Once you get a code from the oauth dance you can feed it
+   to "monzo-oauth --new" on stdin.
+
+   You have to make sure to refresh the code at least every few hours
+   by setting up cron to call "monzo-oauth --refresh".
+
+4. Make cron call "update-starling" and "update-monzo".
+
+   I do it twice an hour.
