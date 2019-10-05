@@ -8,6 +8,7 @@ import os
 import sys
 
 import bankrepo
+import lib
 
 
 class MaxValuePolicy(object):
@@ -119,9 +120,6 @@ STUFF_CHANGED_EXCEPTIONS = {
 }
 
 
-def parse_iso8601(d):
-    return datetime.datetime.strptime(d, "%Y-%m-%dT%H:%M:%S.%fZ")
-
 def deep_compare(a, b, ignore_parts):
     """Check if a and b are deep equal, ignoring some dict keys.
 
@@ -156,43 +154,27 @@ def deep_compare(a, b, ignore_parts):
             changes.append('')
     return changes
 
-def pretty_amount(amount, negative=False, declined=False):
-    minor_units = amount['minorUnits']
-    paren = ('(', ')') if declined else ('', ' ')
-    sign = ''
-    if minor_units < 0:
-        sign = '-'
-        minor_units *= -1
-    elif negative:
-        sign = '-'
-    if amount['currency'] == 'GBP':
-        ret = sign + '£' + ('%.2f' % (minor_units / 100.0))
-    elif amount['currency'] == 'EUR':
-        ret = sign + '€' + ('%.2f' % (minor_units / 100.0))
-    else:
-        ret = '%s%s %s' % (sign, amount['currency'], minor_units)
-    return paren[0] + ret + paren[1]
-
 def dump_item(item):
     versionn = item[-1].payload
 
-    transaction_time = parse_iso8601(versionn['transactionTime'])
+    transaction_time = lib.parse_iso8601(versionn['transactionTime'])
     amount = versionn['amount']
     sign = '-' if versionn['direction'] == 'OUT' else ''
     desc = versionn['counterPartyName']
     print('   %s  %10s  %s' % (
         transaction_time.strftime('%Y-%m-%d %H:%MZ'),
-        pretty_amount(amount, versionn['direction'] == 'OUT',
-                      versionn['status'] == 'DECLINED'),
+        lib.pretty_amount(
+            amount['minorUnits'] * (-1 if versionn['direction'] == 'OUT' else 1),
+            amount['currency'], versionn['status'] == 'DECLINED'),
         desc))
 
     general_violations = []
     general_warnings = []
 
-    update0_time = parse_iso8601(item[0].payload['updatedAt'])
+    update0_time = lib.parse_iso8601(item[0].payload['updatedAt'])
     if update0_time > transaction_time + FirstUpdateDelay.get_max(item[-1]):
         general_violations.append('Transaction first updated too late (%s)' % (update0_time - transaction_time))
-    updaten_time = parse_iso8601(versionn['updatedAt'])
+    updaten_time = lib.parse_iso8601(versionn['updatedAt'])
 
     if updaten_time > transaction_time + LastUpdateDelay.get_max(item[-1]):
         general_violations.append('Transaction last updated too late (%s)' % (updaten_time - transaction_time))
@@ -221,7 +203,7 @@ def dump_item(item):
         else:
             violations.append('unrecognized status %s' % versionn['status'])
 
-        update_time = parse_iso8601(payload['updatedAt'])
+        update_time = lib.parse_iso8601(payload['updatedAt'])
         if update_time < version.prev_commit_time:
             violations.append('transaction was updated at %s while transactions updated before %s should have been covered in a parent commit' % (
                 update_time, version.prev_commit_time))
@@ -268,7 +250,8 @@ def dump_item(item):
     if versionn['status'] == 'PENDING':
         general_warnings.append('Still pending')
     if old_amounts:
-        general_warnings.append('Amount was previously ' + ' and '.join(pretty_amount(a) for a in old_amounts))
+        general_warnings.append('Amount was previously ' + ' and '.join(
+            lib.pretty_amount(a['minorUnits'], a['currency']) for a in old_amounts))
 
     if version_violations or general_violations or general_warnings:
         has_violations = version_violations or general_violations
@@ -302,10 +285,7 @@ def dump_category(feed_items):
         print(' Category has multiple currencies!')
         return True
     if currencies:
-        print(' Balance:', pretty_amount({
-            'currency': next(iter(currencies)),
-            'minorUnits': balance
-        }))
+        print(' Balance:', lib.pretty_amount(balance, next(iter(currencies))))
     return violations
 
 def main():
