@@ -3,12 +3,11 @@
 
 """Audit the Starling account's downloaded transaction data."""
 
-import collections
 import datetime
-import json
 import os
 import sys
-import pygit2
+
+import bankrepo
 
 
 class MaxValuePolicy(object):
@@ -120,48 +119,8 @@ STUFF_CHANGED_EXCEPTIONS = {
 }
 
 
-
-Transaction = collections.namedtuple('Transaction', ('payload', 'blob_id', 'commit_id', 'commit_time', 'prev_commit_time'))
-
-
 def parse_iso8601(d):
     return datetime.datetime.strptime(d, "%Y-%m-%dT%H:%M:%S.%fZ")
-
-
-def read_repo(path):
-    accounts = {}
-    have_transactions = set()
-    repo = pygit2.Repository(path)
-    prev_time = datetime.datetime(2019, 4, 11)  # more or less before the account was opened
-    for commit in repo.walk(repo.head.target, pygit2.GIT_SORT_TOPOLOGICAL|pygit2.GIT_SORT_REVERSE):
-        cur_time = datetime.datetime.utcfromtimestamp(commit.commit_time)
-        for entry1 in commit.tree:  
-            if entry1.type != 'tree':
-                print('Warning: non-tree', entry1.id, 'at root level', file=sys.stderr)
-                continue
-            account = accounts.setdefault(entry1.name, {})
-            for entry2 in repo[entry1.id]:
-                if entry2.type != 'tree':
-                    print('Warning: non-tree', entry2.id, 'at account level', file=sys.stderr)
-                    continue
-                category = account.setdefault(entry2.name, {})
-                for entry3 in repo[entry2.id]:
-                    if entry3.type != 'blob':
-                        print('Warning: non-blob', entry3.id, 'at category level', file=sys.stderr)
-                        continue
-                    transaction = category.setdefault(entry3.name, [])
-                    if transaction and transaction[-1].blob_id == entry3.id:
-                        continue
-                    blob = repo[entry3.id]
-                    transaction.append(Transaction(
-                        payload=json.loads(blob.data.decode('utf-8')),
-                        blob_id=entry3.id,
-                        commit_id=commit.id,
-                        commit_time=cur_time,
-                        prev_commit_time=prev_time,
-                    ))
-        prev_time = cur_time
-    return accounts
 
 def deep_compare(a, b, ignore_parts):
     """Check if a and b are deep equal, ignoring some dict keys.
@@ -351,7 +310,8 @@ def dump_category(feed_items):
 
 def main():
     violations = False
-    accounts = read_repo(os.path.expanduser('~/starling/.git'))
+    accounts = bankrepo.read_repo(
+        os.path.expanduser('~/starling/.git'), has_categories=True)
     for account_id in sorted(accounts):
         print('Account', account_id)
         account = accounts[account_id]
