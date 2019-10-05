@@ -57,6 +57,8 @@ IGNORE_CHANGES = {
     'updatedAt': None,
 }
 
+TIMESTAMP_GRACE_PERIOD = datetime.timedelta(seconds=5)
+
 # Transactions must be seen by us at most this amount of time
 # after the transaction's updatedAt timestamp.
 class MaxCommitDelay(MaxValuePolicy):
@@ -264,7 +266,7 @@ def dump_item(item):
         if update_time < version.prev_commit_time:
             violations.append('transaction was updated at %s while transactions updated before %s should have been covered in a parent commit' % (
                 update_time, version.prev_commit_time))
-        if update_time > version.commit_time + datetime.timedelta(seconds=5):
+        if update_time > version.commit_time + TIMESTAMP_GRACE_PERIOD:
             violations.append('transaction with future date: it was updated at %s but committed at %s' % (
                 update_time, version.commit_time))
         if (
@@ -272,7 +274,7 @@ def dump_item(item):
         ):
             violations.append('Took too long (%s) to commit' % (version.commit_time - update_time))
 
-        if transaction_time > update_time:
+        if transaction_time > update_time + TIMESTAMP_GRACE_PERIOD:
             violations.append('Transaction time %s greater than update time %s' % (transaction_time, update_time))
 
         if prev_payload is not None:
