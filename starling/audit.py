@@ -206,6 +206,9 @@ def dump_item(item):
         elif payload['status'] == 'DECLINED':
             if 'settlementTime' in payload:
                 violations.append('DECLINED transaction has a settlementTime')
+        elif payload['status'] == 'REVERSED':
+            if 'settlementTime' in payload:
+                violations.append('REVERSED transaction has a settlementTime')
         else:
             violations.append('unrecognized status %s' % versionn['status'])
 
@@ -238,6 +241,8 @@ def dump_item(item):
             settled = False
             if prev_payload['status'] == 'PENDING' and payload['status'] == 'SETTLED':
                 settled = True
+            elif prev_payload['status'] == 'PENDING' and payload['status'] == 'REVERSED':
+                pass
             elif prev_payload['status'] != payload['status']:
                 violations.append('status went from %s to %s' % (prev_payload['status'], payload['status']))
             if not settled:
