@@ -68,6 +68,7 @@ class MaxCommitDelay(MaxValuePolicy):
         # after some period of time during which the downloaded
         # didn't run for a long time or failed for a long time.
         '6ec91ffd597920d883ded70b30081c5fbfef5803': datetime.timedelta(days=5),
+        '9c9e8a05be8c9c9b8cdaf589f607b69f027a5bbf': datetime.timedelta(days=2),
     }
 
 class FirstUpdateDelay(MaxValuePolicy):
@@ -91,6 +92,11 @@ class LastUpdateDelay(MaxValuePolicy):
         '61de25ad-3df8-4086-9417-125e5d7e5776': datetime.timedelta(days=53),
         # Settled after <1d but merchant name changed about 74d later.
         'e52b322d-67df-4aac-902c-2d0dd37589f3': datetime.timedelta(days=75)
+    }
+    exceptions_by_commit_id = {
+        # A bunch of TfL transactions were inexplicably updated
+        # at 2019-11-26T16:25:35.262Z.
+        'efb13f2ad9cbee1c3e396d8c49763da87eb9ff32': datetime.timedelta(days=225)
     }
 
 class LastUpdateWarningDelay(LastUpdateDelay):
