@@ -125,6 +125,14 @@ STUFF_CHANGED_EXCEPTIONS = {
     '4ed4ba60-c4e6-44e1-b793-06b918225597',
 }
 
+WHITELISTED_COMMITS = {
+    # On 2020-01-08 sometime around 17:30, a new field "exchangeRate"
+    # appeared in the API. This commit happens to contain only the
+    # addition of that field. Don't consider it an illegal late revision
+    # of the transactions involved.
+    '00c08dd9d35b89f95dbbe454fb5507b8e66c4ea4',
+}
+
 
 def deep_compare(a, b, ignore_parts):
     """Check if a and b are deep equal, ignoring some dict keys.
@@ -192,6 +200,10 @@ def dump_item(item):
     old_amounts = []
     old_source_amounts = []
     for version in item:
+        if str(version.commit_id) in WHITELISTED_COMMITS:
+            prev_payload = version.payload
+            continue
+
         violations = []
         payload = version.payload
 
