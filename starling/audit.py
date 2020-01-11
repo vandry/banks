@@ -96,7 +96,10 @@ class LastUpdateDelay(MaxValuePolicy):
     exceptions_by_commit_id = {
         # A bunch of TfL transactions were inexplicably updated
         # at 2019-11-26T16:25:35.262Z.
-        'efb13f2ad9cbee1c3e396d8c49763da87eb9ff32': datetime.timedelta(days=225)
+        'efb13f2ad9cbee1c3e396d8c49763da87eb9ff32': datetime.timedelta(days=225),
+        # A single transaction from 2019-07-03 was inexplicably updated
+        # on 2019-12-30 with no other apparent field changes.
+        '92981dcdb2dfa44e7f33e6f1468986a39ecc815b': datetime.timedelta(days=181),
     }
 
 class LastUpdateWarningDelay(LastUpdateDelay):
@@ -131,6 +134,11 @@ WHITELISTED_COMMITS = {
     # addition of that field. Don't consider it an illegal late revision
     # of the transactions involved.
     '00c08dd9d35b89f95dbbe454fb5507b8e66c4ea4',
+    # Transaction status went from REVERSED to SETTLED. Apparently that's
+    # a valid state transition, but I won't add it to the rules since it's
+    # definitely something suspicious which I would want to vet every time
+    # it happens.
+    '8050479b15bd8bf3226f19b24c744159a36618a7',
 }
 
 
