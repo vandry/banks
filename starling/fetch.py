@@ -37,7 +37,8 @@ def feed(api, account_id, category):
     except OSError as e:
         if e.errno != errno.EEXIST:
             raise
-    r = api("/api/v2/feed/account/%s/category/%s" % (account_id, category))
+    r = api("/api/v2/feed/account/%s/category/%s?changesSince=%s" % (
+        account_id, category, "2019-01-01T00:00:00.000Z"))
     items = r['feedItems']
     for item in items:
         item_uid = item['feedItemUid']
