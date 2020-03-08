@@ -69,6 +69,11 @@ class MaxCommitDelay(MaxValuePolicy):
         # didn't run for a long time or failed for a long time.
         '6ec91ffd597920d883ded70b30081c5fbfef5803': datetime.timedelta(days=5),
         '9c9e8a05be8c9c9b8cdaf589f607b69f027a5bbf': datetime.timedelta(days=2),
+        # The API change which was adapted for in commit
+        # bb67b904bcc12a2a4d42234c752cc5cfb9c8e32f caused the cron job
+        # to fail for several hours and one transaction was caught late
+        # as a result.
+        '327225ae1a90a18725057c027ba8d91ebe84d1bc': datetime.timedelta(hours=10),
     }
 
 class FirstUpdateDelay(MaxValuePolicy):
@@ -100,6 +105,80 @@ class LastUpdateDelay(MaxValuePolicy):
         # A single transaction from 2019-07-03 was inexplicably updated
         # on 2019-12-30 with no other apparent field changes.
         '92981dcdb2dfa44e7f33e6f1468986a39ecc815b': datetime.timedelta(days=181),
+        # A large number of transactions had their updatedAt field
+        # inexplicably updated, with no other changes, between 2020-01-13
+        # and 2020-01-20 inclusively.
+        '5f9675d221abeb2132d843c8461cc72b88180040': datetime.timedelta(days=278),
+        '9db6eb2ec928c3965850c5ebffc5594d857ddbfe': datetime.timedelta(days=278),
+        '883c5e5732a6686d732385e73fc57a68252e37d8': datetime.timedelta(days=275),
+        'e40d56c451e5eda1d9102c1aa929008b07316a20': datetime.timedelta(days=272),
+        '69009c8d14b9a2afa95f71a044613f80bc967c59': datetime.timedelta(days=269),
+        '39b75c3d5ad032770313f47dd811e983888b7722': datetime.timedelta(days=265),
+        '6f637affd6e2270d1312356ce51d3040d9c365ae': datetime.timedelta(days=258),
+        '81e91f4635e60bba1d38020469417c8aa5ba4f17': datetime.timedelta(days=264),
+        '56d2e0d9ff92bd546b24a45fb3720835779114af': datetime.timedelta(days=264),
+        '87c34e63f522d9735a24e53624722d985d699d5a': datetime.timedelta(days=255),
+        'fe4c59e92f2d4bb2c122808ff77eb2a7b04a285d': datetime.timedelta(days=255),
+        'aca6b57d9b7609e50851be9677601703cb761b4a': datetime.timedelta(days=251),
+        'b4de9d405ddcbc43c9cd8a2678bfa80d05d7c349': datetime.timedelta(days=247),
+        'ccf861bbab2e1edb8cb074ff3454571288fb5640': datetime.timedelta(days=245),
+        '83c307fbbb3cec03977233ae93cb5725680c4094': datetime.timedelta(days=249),
+        '6cda67ab79464cdee9c84d195d9720daa046de36': datetime.timedelta(days=248),
+        'ce0741d9f7a46d61ae0ef4c1f1296a38ec8ddae6': datetime.timedelta(days=249),
+        'd17781c56ac83b4186e75454297dbf2bfcb6eb5e': datetime.timedelta(days=247),
+        '69bb71f5b8f78a0a6a97526689bf6e4f2728346b': datetime.timedelta(days=248),
+        '338d7d1c789996af6cb11c87e3635af52f350961': datetime.timedelta(days=248),
+        '208c074ebcfa8413cadb370af8b96821f161e3ac': datetime.timedelta(days=240),
+        '288c5933baa80b4daa7e1508fcdfad249af35267': datetime.timedelta(days=235),
+        '44f489397b1ee67b82c6e637f2d6c317d5337e4c': datetime.timedelta(days=236),
+        '4eda95bc1f97bd17ffea28bdb8ba1614844de672': datetime.timedelta(days=223),
+        'c8b6ffcf27972c06d61d6e3f1821c181e2c4a690': datetime.timedelta(days=222),
+        '9488bb24a43b940e6c62c2c5e8de62fb032a78e0': datetime.timedelta(days=207),
+        'f81daf507d70c40fae24963ea4538a6eea973891': datetime.timedelta(days=211),
+        'a00280772cfc1f1684189b78f6623d18d686d161': datetime.timedelta(days=212),
+        'a8f05da30e14979fd0ce8d361718f55b1920ae19': datetime.timedelta(days=206),
+        'efc341851e4942d3cda11111b34a87e7a81d43df': datetime.timedelta(days=202),
+        '9013d542da4d7de4439f05ea239b3b0c538c1642': datetime.timedelta(days=197),
+        '04570d7d47702841d89e1b70a01d59c475e060a4': datetime.timedelta(days=199),
+        '35eb5588d960fc3f8028686c5b645ee9dee762b4': datetime.timedelta(days=191),
+        '79d4f87a1471babe2659b4920bdca528f47f27ad': datetime.timedelta(days=185),
+        '06090b992f5606dad9a94386c3eb4d397f96adf6': datetime.timedelta(days=178),
+        'cc69e4a1698a072b648d43cb05521ef6b1f2d7ce': datetime.timedelta(days=180),
+        '35f82882e1a068335c2a93bad897866482282af0': datetime.timedelta(days=173),
+        '115a0f4f1bcb9375c84dcc3c5d8bb39b0dddedfc': datetime.timedelta(days=167),
+        'de8e25cec78066af2f2b065be8178d4307cdbc46': datetime.timedelta(days=151),
+        '064c92fdab3c43edb9b377384b85081bb4202c9c': datetime.timedelta(days=153),
+        '0f51a78d02d0ec1a06545abc5f5f84268bb5c0ff': datetime.timedelta(days=153),
+        '4f0aa55e4558282a00ae85b81e871a8f1bc6573a': datetime.timedelta(days=149),
+        'cc0b33a6095bb9afe075f257434acd9505677fd3': datetime.timedelta(days=145),
+        'dc4e0cc91397860bebae7a5c6f4e7e67567c4589': datetime.timedelta(days=144),
+        'a6fa80a4f1476392c2b1ef936c98eca7b696d937': datetime.timedelta(days=146),
+        '84b79c177c9a12538b2ed86d1b039c0f433cdbf9': datetime.timedelta(days=129),
+        'a09e6b245749d1e591aaa509d99a0c5ca0934269': datetime.timedelta(days=131),
+        'efc72bd8b9d3b7b706c5ba79fb8f012c1a9bbabc': datetime.timedelta(days=131),
+        '586df07b8002ea0922778bae687582ed3c42584c': datetime.timedelta(days=129),
+        '03cecbb709ad4f5d251b1455db3142b641289c2f': datetime.timedelta(days=128),
+        'db454f37ae45d1cf9f63ace5425dbd9155a71903': datetime.timedelta(days=126),
+        '87e0d91133d53ee16009ade87fc3a91726bd725c': datetime.timedelta(days=116),
+        'd996b7f4457ecb32f198cd3215e79275989efa72': datetime.timedelta(days=97),
+        '5fb4302c1f64dba71581bb75c215eca4d247d0df': datetime.timedelta(days=89),
+        'c9aa587d5702bcb6f5717a5873b836de2b8bf37a': datetime.timedelta(days=80),
+        'ed9019d1d087a2fe850419ec164c83183cad2611': datetime.timedelta(days=63),
+        '3811a8571985fcb53fb62bc636d2a9f5cfce8dad': datetime.timedelta(days=55),
+        'd12917966d8739e760e14fa9cd5afe30897e6a9c': datetime.timedelta(days=54),
+        '4a698946eb5312ebd29959161e8f9e8165acb254': datetime.timedelta(days=43),
+        '8891828fece95a20ff746462306d68b7604be2d8': datetime.timedelta(days=43),
+        '1e3c8f5c7795e035a6227c2b42f46fea9b4eb147': datetime.timedelta(days=30),
+        'a1fad22c46b357bb8ccd94177ea71b6bc16ec057': datetime.timedelta(days=32),
+        'd8befc11e878b5f59327434163713390276a93d6': datetime.timedelta(days=16),
+        'e3187b35b30e204536e16023681f5c98c8aeec00': datetime.timedelta(days=20),
+        'f74cce73da1dbc4b43aa9085998d1dae68b8fb41': datetime.timedelta(days=15),
+        # The same (on 2020-01-15) but an additional change snuck in,
+        # a transaction went from PENDING to SETTLED.
+        '327225ae1a90a18725057c027ba8d91ebe84d1bc': datetime.timedelta(days=264),
+        # The same (on 2020-01-17) but an additional change snuck in,
+        # a new inbound Faster payment on 2020-01-17.
+        '10970f4c6d16d830ce4b6985e79ce03ec9b9076d': datetime.timedelta(days=198),
     }
 
 class LastUpdateWarningDelay(LastUpdateDelay):
@@ -198,12 +277,8 @@ def dump_item(item):
         general_violations.append('Transaction first updated too late (%s)' % (update0_time - transaction_time))
     updaten_time = lib.parse_iso8601(versionn['updatedAt'])
 
-    if updaten_time > transaction_time + LastUpdateDelay.get_max(item[-1]):
-        general_violations.append('Transaction last updated too late (%s)' % (updaten_time - transaction_time))
-    elif updaten_time > transaction_time + LastUpdateWarningDelay.get_max(item[-1]):
-        general_warnings.append('Updated quite a long time after the transaction (%s)' % (updaten_time - transaction_time))
-
     version_violations = []
+    version_warnings = []
     prev_payload = None
     old_amounts = []
     old_source_amounts = []
@@ -213,6 +288,7 @@ def dump_item(item):
             continue
 
         violations = []
+        warnings = []
         payload = version.payload
 
         if payload['direction'] not in ('IN', 'OUT'):
@@ -243,6 +319,10 @@ def dump_item(item):
             update_time < version.commit_time - MaxCommitDelay.get_max(version)
         ):
             violations.append('Took too long (%s) to commit' % (version.commit_time - update_time))
+        if update_time > transaction_time + LastUpdateDelay.get_max(version):
+            violations.append('Transaction updated too late (%s)' % (update_time - transaction_time))
+        elif update_time > transaction_time + LastUpdateWarningDelay.get_max(version):
+            warnings.append('Updated quite a long time after the transaction (%s)' % (update_time - transaction_time))
 
         if transaction_time > update_time + TIMESTAMP_GRACE_PERIOD:
             violations.append('Transaction time %s greater than update time %s' % (transaction_time, update_time))
@@ -278,19 +358,25 @@ def dump_item(item):
 
         if violations:
             version_violations.append((version.commit_id, violations))
+        if warnings:
+            version_warnings.append((version.commit_id, warnings))
     if versionn['status'] == 'PENDING':
         general_warnings.append('Still pending')
     if old_amounts:
         general_warnings.append('Amount was previously ' + ' and '.join(
             lib.pretty_amount(a['minorUnits'], a['currency']) for a in old_amounts))
 
-    if version_violations or general_violations or general_warnings:
+    if version_violations or general_violations or version_warnings or general_warnings:
         has_violations = version_violations or general_violations
         print('    feedItemUid', versionn['feedItemUid'], 'has', 'violations:' if has_violations else 'warnings:')
         for commit_id, violations in version_violations:
             print('    ', 'Commit', commit_id)
             for v in violations:
                 print('     ', v)
+        for commit_id, warnings in version_warnings:
+            print('    ', 'Commit', commit_id)
+            for w in warnings:
+                print('     ', w)
         for v in general_violations:
                 print('    ', v)
         for w in general_warnings:
