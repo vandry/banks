@@ -92,12 +92,6 @@ class FirstUpdateDelay(MaxValuePolicy):
 
 class LastUpdateDelay(MaxValuePolicy):
     default = datetime.timedelta(days=14)
-    exceptions_by_feedItemUid = {
-        # Settled after <1d but merchant name changed about 52d later.
-        '61de25ad-3df8-4086-9417-125e5d7e5776': datetime.timedelta(days=53),
-        # Settled after <1d but merchant name changed about 74d later.
-        'e52b322d-67df-4aac-902c-2d0dd37589f3': datetime.timedelta(days=75)
-    }
     exceptions_by_commit_id = {
         # A bunch of TfL transactions were inexplicably updated
         # at 2019-11-26T16:25:35.262Z.
@@ -105,6 +99,10 @@ class LastUpdateDelay(MaxValuePolicy):
         # A single transaction from 2019-07-03 was inexplicably updated
         # on 2019-12-30 with no other apparent field changes.
         '92981dcdb2dfa44e7f33e6f1468986a39ecc815b': datetime.timedelta(days=181),
+        # Settled after <1d but merchant name changed about 52d later.
+        '1ef5fa7abf5d7443906317a36f1b63c7a3b0bd90': datetime.timedelta(days=53),
+        # Settled after <1d but merchant name changed about 74d later.
+        '319f41de33146fdbd6d6ca7733e849847c0bb455': datetime.timedelta(days=75),
         # A large number of transactions had their updatedAt field
         # inexplicably updated, with no other changes, between 2020-01-13
         # and 2020-01-20 inclusively.
@@ -192,25 +190,21 @@ class LastUpdateWarningDelay(LastUpdateDelay):
 
 class StuffChangedExceptions(MaxValuePolicy):
     default = False  # stuff not allowed to change
-    exceptions_by_feedItemUid = {
-        # Unexplained change to counterPartyUid and counterPartySubEntityUid
-        'adbea8b4-292c-41f1-b737-2d0755323b19': True,
-        # Unexplained change to counterPartySubEntityUid
-        'adf7cade-1245-4e17-9c28-781abceb96ba': True,
-        # Unexplained diff to counterPartyUid and counterPartySubEntityUid
-        '4ed23f18-1747-494a-a4f9-ee7cdb814d16': True,
-        # Spelling of counterPartyName was corrected (should this just be ignored?)
-        'e52b322d-67df-4aac-902c-2d0dd37589f3': True,
-        # Spelling of counterPartyName was corrected (should this just be ignored?)
-        '61de25ad-3df8-4086-9417-125e5d7e5776': True,
-        # Unexplained change to counterPartyUid and counterPartySubEntityUid
-        '4ed23f18-1747-494a-a4f9-ee7cdb814d16': True,
-        # Unexplained change to counterPartyUid and counterPartySubEntityUid
-        '4ed4ba60-c4e6-44e1-b793-06b918225597': True,
-    }
     exceptions_by_commit_id = {
         # Unexplained change to counterPartyUid and counterPartySubEntityUid
         '3f66e5be26819d57d0a366a1e88b82fbf16c75b5': True,
+        # Unexplained change to counterPartyUid and counterPartySubEntityUid
+        'ea5b7bcd84cfd8587ab10f87709dfc1a4b73ce1a': True,
+        # Unexplained change to counterPartySubEntityUid
+        'a5854dfbed67c1d71b1f4c7bd552814059461fd8': True,
+        # Unexplained diff to counterPartyUid and counterPartySubEntityUid
+        '9d9f6c9e580c46ab1f15e4e67f1f9beef21b1773': True,
+        # Spelling of counterPartyName was corrected (should this just be ignored?)
+        '319f41de33146fdbd6d6ca7733e849847c0bb455': True,
+        # Spelling of counterPartyName was corrected (should this just be ignored?)
+        '1ef5fa7abf5d7443906317a36f1b63c7a3b0bd90': True,
+        # Unexplained change to counterPartyUid and counterPartySubEntityUid
+        '9d9f6c9e580c46ab1f15e4e67f1f9beef21b1773': True,
     }
 
 WHITELISTED_COMMITS = {
