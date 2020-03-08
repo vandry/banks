@@ -190,22 +190,28 @@ class LastUpdateWarningDelay(LastUpdateDelay):
         'f45c75f3-7954-454a-beb8-76133a4ca3da': datetime.timedelta(days=13),
     }
 
-STUFF_CHANGED_EXCEPTIONS = {
-    # Unexplained change to counterPartyUid and counterPartySubEntityUid
-    'adbea8b4-292c-41f1-b737-2d0755323b19',
-    # Unexplained change to counterPartySubEntityUid
-    'adf7cade-1245-4e17-9c28-781abceb96ba',
-    # Unexplained diff to counterPartyUid and counterPartySubEntityUid
-    '4ed23f18-1747-494a-a4f9-ee7cdb814d16',
-    # Spelling of counterPartyName was corrected (should this just be ignored?)
-    'e52b322d-67df-4aac-902c-2d0dd37589f3',
-    # Spelling of counterPartyName was corrected (should this just be ignored?)
-    '61de25ad-3df8-4086-9417-125e5d7e5776',
-    # Unexplained change to counterPartyUid and counterPartySubEntityUid
-    '4ed23f18-1747-494a-a4f9-ee7cdb814d16',
-    # Unexplained change to counterPartyUid and counterPartySubEntityUid
-    '4ed4ba60-c4e6-44e1-b793-06b918225597',
-}
+class StuffChangedExceptions(MaxValuePolicy):
+    default = False  # stuff not allowed to change
+    exceptions_by_feedItemUid = {
+        # Unexplained change to counterPartyUid and counterPartySubEntityUid
+        'adbea8b4-292c-41f1-b737-2d0755323b19': True,
+        # Unexplained change to counterPartySubEntityUid
+        'adf7cade-1245-4e17-9c28-781abceb96ba': True,
+        # Unexplained diff to counterPartyUid and counterPartySubEntityUid
+        '4ed23f18-1747-494a-a4f9-ee7cdb814d16': True,
+        # Spelling of counterPartyName was corrected (should this just be ignored?)
+        'e52b322d-67df-4aac-902c-2d0dd37589f3': True,
+        # Spelling of counterPartyName was corrected (should this just be ignored?)
+        '61de25ad-3df8-4086-9417-125e5d7e5776': True,
+        # Unexplained change to counterPartyUid and counterPartySubEntityUid
+        '4ed23f18-1747-494a-a4f9-ee7cdb814d16': True,
+        # Unexplained change to counterPartyUid and counterPartySubEntityUid
+        '4ed4ba60-c4e6-44e1-b793-06b918225597': True,
+    }
+    exceptions_by_commit_id = {
+        # Unexplained change to counterPartyUid and counterPartySubEntityUid
+        '3f66e5be26819d57d0a366a1e88b82fbf16c75b5': True,
+    }
 
 WHITELISTED_COMMITS = {
     # On 2020-01-08 sometime around 17:30, a new field "exchangeRate"
@@ -328,7 +334,7 @@ def dump_item(item):
             violations.append('Transaction time %s greater than update time %s' % (transaction_time, update_time))
 
         if prev_payload is not None:
-            if versionn['feedItemUid'] not in STUFF_CHANGED_EXCEPTIONS:
+            if not StuffChangedExceptions.get_max(version):
                 for c in deep_compare(prev_payload, payload, IGNORE_CHANGES):
                     violations.append('%s changed between versions' % c)
             # This actually happens, apparently legitimately, for unexplained reasons
