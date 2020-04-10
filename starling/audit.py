@@ -55,6 +55,7 @@ IGNORE_CHANGES = {
     'spendingCategory': None,  # explicly changable in the app UI
     'status': None,
     'updatedAt': None,
+    'hasAttachment': None, # it seems fair that attachments are not immutable.
 }
 
 TIMESTAMP_GRACE_PERIOD = datetime.timedelta(seconds=5)
@@ -177,6 +178,26 @@ class LastUpdateDelay(MaxValuePolicy):
         # The same (on 2020-01-17) but an additional change snuck in,
         # a new inbound Faster payment on 2020-01-17.
         '10970f4c6d16d830ce4b6985e79ce03ec9b9076d': datetime.timedelta(days=198),
+        # A large number of transactions had their updatedAt field
+        # inexplicably updated, with no other changes, between 2020-03-10 and
+        # 2020-03-23.
+        '96210d8c0f7608f95e49827b24cff9dd0fd1fc3e': datetime.timedelta(days=302),
+        'd9ecaa9b2d13f71a5c35a3580732b57e20e6e14f': datetime.timedelta(days=314),
+        'b2861c2d501b092df3fd2a493af81bede6b6689b': datetime.timedelta(days=310),
+        'e688fa5823f5f3be527a112adcd77ce9c9e24762': datetime.timedelta(days=311),
+        'c919d0e8b034e72829a75fdbb68b69b579b223a6': datetime.timedelta(days=305),
+        'a326593b83380d6cb7ff638c3b207f5835a36dbd': datetime.timedelta(days=306),
+        '176615756b6d4bad68f52ebc27d0556259243af2': datetime.timedelta(days=285),
+        '81cf4b7028fb33b40a1d90cb8c267b8eef04d065': datetime.timedelta(days=252),
+        '6214c79aad856365c21e116f0d0a5b8df6bccdfb': datetime.timedelta(days=233),
+        'ab626400c09c3e09107e25f24c0fbe7997c527fd': datetime.timedelta(days=234),
+        '39f612aee97210136af9a40fba52b1cfec35102b': datetime.timedelta(days=227),
+        '0621bfed9904fc45f002c363d8bda8e93d525a29': datetime.timedelta(days=213),
+        '11b653743d7458290e2065da8bd4d54a19530223': datetime.timedelta(days=214),
+        '408aa136b292b783cecc24be17ccd6517bbf1629': datetime.timedelta(days=213),
+        '9b194f51d8e236ea9ca52cd5fef6b44e0929b46f': datetime.timedelta(days=212),
+        '12d9b51a6d07729cd13c2e0a5ef8ed8fdb713902': datetime.timedelta(days=158),
+        'e56c47902500f768d04ab03d408ef8aeaaefd2d2': datetime.timedelta(days=84),
     }
 
 class LastUpdateWarningDelay(LastUpdateDelay):
@@ -205,6 +226,8 @@ class StuffChangedExceptions(MaxValuePolicy):
         '1ef5fa7abf5d7443906317a36f1b63c7a3b0bd90': True,
         # Unexplained change to counterPartyUid and counterPartySubEntityUid
         '9d9f6c9e580c46ab1f15e4e67f1f9beef21b1773': True,
+        # Unexplained change to counterPartyUid and counterPartySubEntityUid
+        '854be5442977318fb08b1ccddf3c52995f36829a': True,
     }
 
 WHITELISTED_COMMITS = {
@@ -218,6 +241,14 @@ WHITELISTED_COMMITS = {
     # definitely something suspicious which I would want to vet every time
     # it happens.
     '8050479b15bd8bf3226f19b24c744159a36618a7',
+    # A bunch of transactions grew a hasAttachment field without updatedAt
+    # being updated, leading us to conclude the change was backdated. That
+    # seems to be a legitimate new field in the API.
+    '9b48fdba2e9903f7215db875b41a6d02c9de119a',
+    # A bunch of transactions grew a transactingApplicationUserUid field
+    # without updatedAt being updated, leading us to conclude the change
+    # was backdated. That seems to be a legitimate new field in the API.
+    'b4792d7c245ea9f0652502daea54842b73d12880',
 }
 
 
