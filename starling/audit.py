@@ -324,20 +324,14 @@ def dump_item(item):
 
         if payload['direction'] not in ('IN', 'OUT'):
             violations.append('unrecognized direction %s' % version['direction'])
-        if payload['status'] == 'PENDING':
+        if payload['status'] in ('PENDING', 'UPCOMING', 'DECLINED', 'REVERSED'):
             if 'settlementTime' in payload:
-                violations.append('PENDING transaction has a settlementTime')
+                violations.append(payload['status'] + ' transaction has a settlementTime')
         elif payload['status'] == 'SETTLED':
             if 'settlementTime' not in payload:
                 violations.append('SETTLED transaction has no settlementTime')
-        elif payload['status'] == 'DECLINED':
-            if 'settlementTime' in payload:
-                violations.append('DECLINED transaction has a settlementTime')
-        elif payload['status'] == 'REVERSED':
-            if 'settlementTime' in payload:
-                violations.append('REVERSED transaction has a settlementTime')
         else:
-            violations.append('unrecognized status %s' % versionn['status'])
+            violations.append('unrecognized status %s' % payload['status'])
 
         update_time = lib.parse_iso8601(payload['updatedAt'])
         if update_time < version.prev_commit_time:
@@ -355,8 +349,12 @@ def dump_item(item):
         elif update_time > transaction_time + LastUpdateWarningDelay.get_max(version):
             warnings.append('Updated quite a long time after the transaction (%s)' % (update_time - transaction_time))
 
-        if transaction_time > update_time + TIMESTAMP_GRACE_PERIOD:
-            violations.append('Transaction time %s greater than update time %s' % (transaction_time, update_time))
+        if payload['status'] == 'UPCOMING':
+            if transaction_time < update_time - TIMESTAMP_GRACE_PERIOD:
+                violations.append('Upcoming transaction is not in the future')
+        else:
+            if transaction_time > update_time + TIMESTAMP_GRACE_PERIOD:
+                violations.append('Transaction time %s greater than update time %s' % (transaction_time, update_time))
 
         if prev_payload is not None:
             if not StuffChangedExceptions.get_max(version):
@@ -372,6 +370,10 @@ def dump_item(item):
             settled = False
             if prev_payload['status'] == 'PENDING' and payload['status'] == 'SETTLED':
                 settled = True
+            elif prev_payload['status'] == 'UPCOMING' and payload['status'] == 'SETTLED':
+                settled = True
+            elif prev_payload['status'] == 'UPCOMING' and payload['status'] == 'PENDING':
+                pass
             elif prev_payload['status'] == 'PENDING' and payload['status'] == 'REVERSED':
                 pass
             elif prev_payload['status'] != payload['status']:
