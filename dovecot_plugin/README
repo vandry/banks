@@ -1,0 +1,15 @@
+A fun (or not) Dovecot plugin that presents a Starling bank account
+as an IMAP folder.
+
+This configuration might work:
+
+namespace {
+  prefix = "prefix/"
+  location = bank:~/some/directory
+}
+
+In /some/directory or any subdirectory thereof, create one symlink
+and one file:
+
+  ln -s /git/repo/directory/.git repo
+  echo "category-id/account-id" >path
