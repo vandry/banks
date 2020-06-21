@@ -60,6 +60,14 @@ IGNORE_CHANGES = {
 
 TIMESTAMP_GRACE_PERIOD = datetime.timedelta(seconds=5)
 
+# To account for the amount of time that passes between the time of
+# the snapshot that the bank gives us and the time at which we commit
+# the contents of that snapshot. We cannot insist that a transaction
+# update that occurred between those two times must have been present
+# in the commit even if its update time is earlier than the commit.
+# As of 2020-06-21 the fetch script runs for about 18 seconds.
+COMMIT_GRACE_PERIOD = datetime.timedelta(seconds=25)
+
 # Transactions must be seen by us at most this amount of time
 # after the transaction's updatedAt timestamp.
 class MaxCommitDelay(MaxValuePolicy):
@@ -334,7 +342,7 @@ def dump_item(item):
             violations.append('unrecognized status %s' % payload['status'])
 
         update_time = lib.parse_iso8601(payload['updatedAt'])
-        if update_time < version.prev_commit_time:
+        if update_time < version.prev_commit_time - COMMIT_GRACE_PERIOD:
             violations.append('transaction was updated at %s while transactions updated before %s should have been covered in a parent commit' % (
                 update_time, version.prev_commit_time))
         if update_time > version.commit_time + TIMESTAMP_GRACE_PERIOD:
