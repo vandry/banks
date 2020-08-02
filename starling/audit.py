@@ -98,6 +98,12 @@ class FirstUpdateDelay(MaxValuePolicy):
         # updatedAt sometime during the following day.
         '45df1294-8bfc-4523-8fac-e5210ce5d72d': datetime.timedelta(days=1),
     }
+    exceptions_by_commit_id = {
+        # https://api.starlingbank.com/api/v2/accounts broken.
+        # Returns an empty account list, which has broken fetching
+        # and made us miss the first update.
+        'adb2d6448c6392a57f3991baed8fb87ccbf9a147': datetime.timedelta(days=3),
+    }
 
 class LastUpdateDelay(MaxValuePolicy):
     default = datetime.timedelta(days=14)
@@ -257,6 +263,11 @@ WHITELISTED_COMMITS = {
     # without updatedAt being updated, leading us to conclude the change
     # was backdated. That seems to be a legitimate new field in the API.
     'b4792d7c245ea9f0652502daea54842b73d12880',
+    # Contains a transaction that is future-dated by 40 seconds or so.
+    'c2bf84e56b88835b9d08afb494b005bb04600fa4',
+    # https://api.starlingbank.com/api/v2/accounts broken.
+    # Returns an empty account list, which has broken fetching.
+    'adb2d6448c6392a57f3991baed8fb87ccbf9a147',
 }
 
 
@@ -312,7 +323,7 @@ def dump_item(item):
     general_warnings = []
 
     update0_time = lib.parse_iso8601(item[0].payload['updatedAt'])
-    if update0_time > transaction_time + FirstUpdateDelay.get_max(item[-1]):
+    if update0_time > transaction_time + FirstUpdateDelay.get_max(item[0]):
         general_violations.append('Transaction first updated too late (%s)' % (update0_time - transaction_time))
     updaten_time = lib.parse_iso8601(versionn['updatedAt'])
 
