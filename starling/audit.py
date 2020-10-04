@@ -268,6 +268,8 @@ WHITELISTED_COMMITS = {
     # https://api.starlingbank.com/api/v2/accounts broken.
     # Returns an empty account list, which has broken fetching.
     'adb2d6448c6392a57f3991baed8fb87ccbf9a147',
+    # A large number of transactions grew a new 'hasReceipt' field.
+    'd939f75f3c519a571d638375a8fb88203938a426',
 }
 
 
