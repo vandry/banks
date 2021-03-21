@@ -2,7 +2,12 @@
 
 import contextlib
 import fcntl
-import httplib
+try:
+    import http.client
+except ImportError:
+    import httplib
+else:
+    httplib = http.client
 import json
 import os
 import subprocess
@@ -69,6 +74,13 @@ class BankAPI(object):
         }
         conn.request("GET", url, headers=headers)
         r = conn.getresponse()
+        if r.status == 403 and r.headers['x-2fa-approval-result'] == 'REJECTED':
+            r.read()
+            twotoken = r.headers['x-2fa-approval']
+            headers['X-2FA-Approval'] = twotoken
+            headers['X-Signature'] = self.sign_2fa(twotoken)
+            conn.request("GET", url, headers=headers)
+            r = conn.getresponse()
         if r.status != 200:
-            raise RuntimeError('%d %s' % (r.status, r.reason))
-        return json.load(r)
+            raise RuntimeError('%d %s: %s' % (r.status, r.reason, r.read()))
+        return json.loads(r.read().decode('utf-8'))
