@@ -152,7 +152,8 @@ get_date(json_object *p, char *buf, size_t max)
 static void
 identify_counterparty(json_object *p, string_t *dest)
 {
-	struct json_object *item;
+	struct json_object *item, *details_block;
+	const char *label = NULL;
 	int need_open = 0;
 	int need_close = 0;
 	int have_username = 0;
@@ -164,8 +165,54 @@ identify_counterparty(json_object *p, string_t *dest)
 		(json_object_object_get_ex(p, "counterPartyName", &item)) &&
 		(json_object_is_type(item, json_type_string))
 	) {
+		/* Starling */
 		str_append(dest, json_object_get_string(item));
 		need_open = need_close = 1;
+	} else if (
+		(json_object_object_get_ex(p, "details", &details_block)) &&
+		(json_object_is_type(details_block, json_type_object))
+	) {
+		/* Wise */
+		if ((
+			(json_object_object_get_ex(details_block, "originator", &item)) &&
+			(json_object_is_type(item, json_type_string))
+		) || (
+			(json_object_object_get_ex(details_block, "senderName", &item)) &&
+			(json_object_is_type(item, json_type_string))
+		) || (
+			(json_object_object_get_ex(details_block, "merchant", &item)) &&
+			(json_object_is_type(item, json_type_object)) &&
+			(json_object_object_get_ex(item, "name", &item)) &&
+			(json_object_is_type(item, json_type_string))
+		)) {
+			/* Various types of Wise transaction */
+			str_append(dest, json_object_get_string(item));
+			need_open = need_close = 1;
+		} else if (
+			(json_object_object_get_ex(p, "type", &item)) &&
+			(json_object_is_type(item, json_type_string))
+		) {
+			/* For currency conversions we can consider that
+			   the counterparty name is the "opposite" currency,
+			   which depends. */
+			const char *type = json_object_get_string(item);
+			if (0 == strcmp(type, "DEBIT")) {
+				label = "targetAmount";
+			} else if (0 == strcmp(type, "CREDIT")) {
+				label = "sourceAmount";
+			}
+			if (
+				(label != NULL) &&
+				(json_object_object_get_ex(details_block, label, &item)) &&
+				(json_object_is_type(item, json_type_object)) &&
+				(json_object_object_get_ex(item, "currency", &item)) &&
+				(json_object_is_type(item, json_type_string))
+			) {
+				str_append(dest, json_object_get_string(item));
+				need_open = need_close = 1;
+			}
+		}
+		/* For type=MONEY_ADDED we got nothing */
 	}
 	if (
 		(json_object_object_get_ex(p, "counterPartySubEntityUid", &item)) &&
@@ -199,6 +246,12 @@ identify_counterparty(json_object *p, string_t *dest)
 		) {
 			str_append(dest, json_object_get_string(item));
 		}
+	} else {
+		if (need_open) {
+			str_append(dest, " <");
+			need_open = 0;
+		}
+		str_append(dest, "unknown@unknown");
 	}
 	if (need_close && (!need_open)) {
 		str_append(dest, ">");
@@ -214,6 +267,7 @@ identify_subject(json_object *p, string_t *dest)
 	const char *symbol;
 	const char *format;
 	int have_amount = 0;
+	int need_factor = -1;
 	double amount, factor;
 	char amount_s[50];
 
@@ -238,6 +292,11 @@ identify_subject(json_object *p, string_t *dest)
 			currency = json_object_get_string(item);
 		}
 		if (json_object_object_get_ex(amount_block, "minorUnits", &item)) {
+			need_factor = 1;  /* Starling */
+		} else if (json_object_object_get_ex(amount_block, "value", &item)) {
+			need_factor = 0;  /* Wise */
+		}
+		if (need_factor >= 0) {
 			if (json_object_is_type(item, json_type_double)) {
 				amount = json_object_get_double(item);
 				have_amount = 1;
@@ -250,24 +309,28 @@ identify_subject(json_object *p, string_t *dest)
 	if (have_amount) {
 		if (strcmp(currency, "GBP") == 0) {
 			symbol = "=C2=A3";
-			factor = 0.01;
+			factor = need_factor ? 0.01 : 1.0;
 			format = "%s%s%.2f";
 		} else if (strcmp(currency, "EUR") == 0) {
 			symbol = "=E2=82=AC";
-			factor = 0.01;
+			factor = need_factor ? 0.01 : 1.0;
 			format = "%s%s%.2f";
 		} else if (strcmp(currency, "CAD") == 0) {
 			symbol = "CAD$";
-			factor = 0.01;
+			factor = need_factor ? 0.01 : 1.0;
 			format = "%s%s%.2f";
 		} else if (strcmp(currency, "USD") == 0) {
 			symbol = "USD$";
-			factor = 0.01;
+			factor = need_factor ? 0.01 : 1.0;
 			format = "%s%s%.2f";
 		} else {
 			symbol = currency;
 			factor = 1.0;  /* ? */
 			format = "%s%s%f";
+		}
+		if (((*sign) == 0) && (amount < 0.0)) {
+			amount *= -1.0;
+			sign = "-";
 		}
 		snprintf(amount_s, sizeof(amount_s), format, sign, symbol, amount * factor);
 		str_append(dest, amount_s);
@@ -276,6 +339,7 @@ identify_subject(json_object *p, string_t *dest)
 		(json_object_object_get_ex(p, "source", &item)) &&
 		(json_object_is_type(item, json_type_string))
 	) {
+		/* Starling */
 		if (have_amount) {
 			str_append(dest, " via ");
 		}
@@ -287,6 +351,17 @@ identify_subject(json_object *p, string_t *dest)
 			str_append(dest, " ");
 			str_append(dest, json_object_get_string(item));
 		}
+	} else if (
+		(json_object_object_get_ex(p, "details", &item)) &&
+		(json_object_is_type(item, json_type_object)) &&
+		(json_object_object_get_ex(item, "type", &item)) &&
+		(json_object_is_type(item, json_type_string))
+	) {
+		/* Wise */
+		if (have_amount) {
+			str_append(dest, " via ");
+		}
+		str_append(dest, json_object_get_string(item));
 	}
 }
 

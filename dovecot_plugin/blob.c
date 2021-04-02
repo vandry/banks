@@ -17,7 +17,8 @@ blob_get_date(json_object *p, time_t *ret)
 	if (!json_object_is_type(p, json_type_object)) {
 		return -1;
 	}
-	if (!json_object_object_get_ex(p, "transactionTime", &transactionTime)) {
+	if ((!json_object_object_get_ex(p, "transactionTime", &transactionTime)) &&
+	    (!json_object_object_get_ex(p, "date", &transactionTime))) {
 		return -1;
 	}
 	if (!json_object_is_type(transactionTime, json_type_string)) {
