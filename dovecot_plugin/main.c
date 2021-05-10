@@ -111,7 +111,7 @@ bank_mailbox_open(struct mailbox *box)
 		}
 		return -1;
 	}
-	input = i_stream_create_fd(fd, (size_t)-1, TRUE);
+	input = i_stream_create_fd_autoclose(&fd, (size_t)-1);
 	line = i_stream_read_next_line(input);
 	if ((line == NULL) || ((*line) == 0)) {
 		mail_storage_set_critical(box->storage, "nothing read from %s", path_filename);

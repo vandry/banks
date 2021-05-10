@@ -5,6 +5,7 @@
 #include "hash.h"
 #include "ioloop.h"
 #include "mail-index.h"
+#include "mailbox-recent-flags.h"
 
 #include "repo.h"
 #include "bank.h"
