@@ -58,7 +58,7 @@ IGNORE_CHANGES = {
     'hasAttachment': None, # it seems fair that attachments are not immutable.
 }
 
-TIMESTAMP_GRACE_PERIOD = datetime.timedelta(seconds=5)
+TIMESTAMP_GRACE_PERIOD = datetime.timedelta(seconds=7)
 
 # To account for the amount of time that passes between the time of
 # the snapshot that the bank gives us and the time at which we commit
@@ -66,7 +66,7 @@ TIMESTAMP_GRACE_PERIOD = datetime.timedelta(seconds=5)
 # update that occurred between those two times must have been present
 # in the commit even if its update time is earlier than the commit.
 # As of 2020-06-21 the fetch script runs for about 18 seconds.
-COMMIT_GRACE_PERIOD = datetime.timedelta(seconds=25)
+COMMIT_GRACE_PERIOD = datetime.timedelta(seconds=35)
 
 # Transactions must be seen by us at most this amount of time
 # after the transaction's updatedAt timestamp.
@@ -83,6 +83,9 @@ class MaxCommitDelay(MaxValuePolicy):
         # to fail for several hours and one transaction was caught late
         # as a result.
         '327225ae1a90a18725057c027ba8d91ebe84d1bc': datetime.timedelta(hours=10),
+        # A wedged instance of the cron job that held the lock for
+        # a couple of weeks.
+        '9d9ba6c7c6f1b60a02451098dbdc30009c4284aa': datetime.timedelta(days=17),
     }
 
 class FirstUpdateDelay(MaxValuePolicy):
@@ -103,6 +106,9 @@ class FirstUpdateDelay(MaxValuePolicy):
         # Returns an empty account list, which has broken fetching
         # and made us miss the first update.
         'adb2d6448c6392a57f3991baed8fb87ccbf9a147': datetime.timedelta(days=3),
+        # A wedged instance of the cron job that held the lock for
+        # a couple of weeks.
+        '9d9ba6c7c6f1b60a02451098dbdc30009c4284aa': datetime.timedelta(days=17),
     }
 
 class LastUpdateDelay(MaxValuePolicy):
