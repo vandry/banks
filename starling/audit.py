@@ -86,6 +86,8 @@ class MaxCommitDelay(MaxValuePolicy):
         # A wedged instance of the cron job that held the lock for
         # a couple of weeks.
         '9d9ba6c7c6f1b60a02451098dbdc30009c4284aa': datetime.timedelta(days=17),
+        # Downloads wedged between 2021-08-19 and 2021-08-25.
+        'b9a4bb3f4219ef74c423d423b0802abb9bdd8bbd': datetime.timedelta(days=3),
     }
 
 class FirstUpdateDelay(MaxValuePolicy):
@@ -109,6 +111,8 @@ class FirstUpdateDelay(MaxValuePolicy):
         # A wedged instance of the cron job that held the lock for
         # a couple of weeks.
         '9d9ba6c7c6f1b60a02451098dbdc30009c4284aa': datetime.timedelta(days=17),
+        # Downloads wedged between 2021-08-19 and 2021-08-25.
+        'b9a4bb3f4219ef74c423d423b0802abb9bdd8bbd': datetime.timedelta(days=3),
     }
 
 class LastUpdateDelay(MaxValuePolicy):
@@ -218,6 +222,10 @@ class LastUpdateDelay(MaxValuePolicy):
         '9b194f51d8e236ea9ca52cd5fef6b44e0929b46f': datetime.timedelta(days=212),
         '12d9b51a6d07729cd13c2e0a5ef8ed8fdb713902': datetime.timedelta(days=158),
         'e56c47902500f768d04ab03d408ef8aeaaefd2d2': datetime.timedelta(days=84),
+        # Some transactions had their updatedAt field inexplicably updated,
+        # with no other changes, on 2021-12-04.
+        '5d4705cb1c408521a2bbcedf85caa5aadf401446': datetime.timedelta(days=865),
+        '107055ec56bee0731ed551c3d7b91b539117a808': datetime.timedelta(days=674),
     }
 
 class LastUpdateWarningDelay(LastUpdateDelay):
@@ -276,6 +284,8 @@ WHITELISTED_COMMITS = {
     'adb2d6448c6392a57f3991baed8fb87ccbf9a147',
     # A large number of transactions grew a new 'hasReceipt' field.
     'd939f75f3c519a571d638375a8fb88203938a426',
+    # updatedAt on SETTLED transaction 46 seconds before transactionTime
+    '906ad8f6fd0f0f24823dc818f01bf9af693c9fb5',
 }
 
 
