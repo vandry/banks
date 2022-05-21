@@ -226,6 +226,11 @@ class LastUpdateDelay(MaxValuePolicy):
         # with no other changes, on 2021-12-04.
         '5d4705cb1c408521a2bbcedf85caa5aadf401446': datetime.timedelta(days=865),
         '107055ec56bee0731ed551c3d7b91b539117a808': datetime.timedelta(days=674),
+        # Both arms of a transfer from GBP to EUR had updatedAt modified
+        # nearly 3 years after the fact with no other change.
+        '932515816d7c228f1246b700c665ced9bb7e594f': datetime.timedelta(days=1024),
+        # Single transaction, updatedAt changed 8 months later.
+        'a70c6ff47052ef59858c801d96030091a131d596': datetime.timedelta(days=238),
     }
 
 class LastUpdateWarningDelay(LastUpdateDelay):
@@ -328,6 +333,8 @@ WHITELISTED_COMMITS = {
     '256ab9d34e6cddabf08bfafe2a0e70517007c063',
     'd65bfed1092e176322cb8abae9122cff4318c122',
     '54a5c44d994c761a6e43d4687af1502de285f231',  # merchant completely renamed!
+    # Transaction was updated 16 seconds before it happened.
+    '4e539110884299410451444f52e40e325ef5f28e',
 }
 
 
