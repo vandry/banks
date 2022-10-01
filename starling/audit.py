@@ -316,6 +316,17 @@ WHITELISTED_COMMITS = {
     '72633050b8afb1f11170b19f64c6dbdef4c106bd',
     'bdb32f88dac8797b47fdd0133bc84922a0462d49',
     'c88a606a9126c620273c7a525463492698cbc5c1',
+    'a888a926ca8e924162ecd8c8d6e57cf1e682f671',
+    'f88c1ff840f6522cf21cee41e9b4ee8218855b6b',
+    'f4844870ef7d322bde6c080aa38ee1efcb334c3c',
+    '474a67b8dd43a5af18de41ec94870615e6c82bf8',
+    'de4534a60bc56a1f0b0a318ff46527911581dfe7',
+    '6b875b42b186b42f7c30359e20d05b3b1f4225df',
+    'cf8680d5fa4c162b9657ccb830468586d36a55c6',
+    '27cab92868d0f7e2342a5645d7987faa937c7298',
+    '0408df20104057c18ac1279b2f8f2a3df06a757b',
+    '647bd27821696139043639ba1967f4da461d0a2b',
+    '2eaf2b9cd2d816e8625dd40101fc445324d6137b',
     # - 'reference', 'counterPartyName',
     #   'counterPartyUid', 'counterPartySubEntityUid'
     'bfe83f2e8794c726063d4fd441c0c6f9ed1749ac',
@@ -323,6 +334,19 @@ WHITELISTED_COMMITS = {
     '256ab9d34e6cddabf08bfafe2a0e70517007c063',
     'd65bfed1092e176322cb8abae9122cff4318c122',
     '54a5c44d994c761a6e43d4687af1502de285f231',  # merchant completely renamed!
+    '88ed744b6bb7236ade4e06e2f7516080a0e0e2ec',
+    '01d964b0212f99eb69a93113fb5228a9a8bb3d50',  # merchant completely renamed!
+    '9326c73d0bb65d5ce5941a2e998977dde39b6ead',
+    '53043a68e8e753dd883e9702b6fe92c66dfa814d',
+    '873ade11f6c1e33bcc1f7d339cb8fdc95ff16823',
+    '6a5897bd1d7d643cea34574e800a8f8bf34c77e8',
+    '4cf392fc6b00cd55f33daf5a9869b7109204359b',
+    '32ef3ffeffdf684faca9498984a0debbdf607baa',
+    'fdca2f1c8389ae4af7627055f49747a506d60880',
+    # - 'reference', 'counterPartySubEntityUid'
+    'd0a8d4d41ad97678b00b9da19676f210d52d358f',
+    'b8e32c1492204047cdb41c70e1493d0e337759aa',
+    '9c4d22193f6d156291e6af37cf02df025e602096',
     # Transaction was updated 16 seconds before it happened.
     '4e539110884299410451444f52e40e325ef5f28e',
     # On 2022-06-29 a new field 'batchPaymentDetails' was
