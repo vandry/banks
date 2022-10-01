@@ -63,7 +63,7 @@ IGNORE_CHANGES = {
 IGNORE_CHANGES_ON_SETTLEMENT = IGNORE_CHANGES.copy()
 IGNORE_CHANGES_ON_SETTLEMENT['reference'] = None
 
-TIMESTAMP_GRACE_PERIOD = datetime.timedelta(seconds=7)
+TIMESTAMP_GRACE_PERIOD = datetime.timedelta(seconds=33)
 
 # To account for the amount of time that passes between the time of
 # the snapshot that the bank gives us and the time at which we commit
