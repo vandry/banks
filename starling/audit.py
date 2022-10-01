@@ -396,7 +396,11 @@ def dump_item(item):
     transaction_time = lib.parse_iso8601(versionn['transactionTime'])
     amount = versionn['amount']
     sign = '-' if versionn['direction'] == 'OUT' else ''
-    desc = versionn['counterPartyName']
+    try:
+        desc = versionn['counterPartyName']
+    except KeyError:
+        # Incoming SWIFT apparently has no counterPartyName.
+        desc = versionn['reference']
     print('   %s  %10s  %s' % (
         transaction_time.strftime('%Y-%m-%d %H:%MZ'),
         lib.pretty_amount(
