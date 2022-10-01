@@ -58,6 +58,11 @@ IGNORE_CHANGES = {
     'hasAttachment': None, # it seems fair that attachments are not immutable.
 }
 
+# It seems most terribly dodgy, but it looks like after 2022-04-03
+# 'reference' changes on every settlement.
+IGNORE_CHANGES_ON_SETTLEMENT = IGNORE_CHANGES.copy()
+IGNORE_CHANGES_ON_SETTLEMENT['reference'] = None
+
 TIMESTAMP_GRACE_PERIOD = datetime.timedelta(seconds=7)
 
 # To account for the amount of time that passes between the time of
@@ -306,35 +311,6 @@ WHITELISTED_COMMITS = {
     # updatedAt on SETTLED transaction 46 seconds before transactionTime
     '906ad8f6fd0f0f24823dc818f01bf9af693c9fb5',
     # 2022-04-03 .. 2022-05-20 several attributes changed upon settlement:
-    # - Just 'reference':
-    '3231430055b1d6fc01931f215777cc335d137f58',
-    '6c3b149485979ce1db3a222e50efe4d8f23f6201',
-    '16090d01b32fd4ecfc7bd0993177b99ba59d9e52',
-    'eb2d03ca735ef50972b319ccddc07eab79943f02',
-    '30ea429097062063ef402841d99affec6924b028',
-    'd97c6f46d15f83ea9ac35bfd1a539c902e3910a9',
-    'b8fa14de6cd7755b915d862deea325dbda673ddb',
-    'a6889ac76bee609244d17fc9bb949c7862d84e72',
-    '6e19f7bcb6067528efb34e82d5cd7bf4b91380d1',
-    '842269bc19290dd97247cc83ca3d1565843c6b1d',
-    '6564b5a352d88f907d7b72b3fc72f7abee3bab95',
-    'c2df0a91065f073905ae36b58f224ed06741b481',
-    '909506db130fed55c125fc69a0717c77ddee20cd',
-    'c02ec3afb2942b56bbf0b5ac62ee7f7b95ca3616',
-    'c4a4e5a1bddc387e09c112ffdfd7421c8d725ef8',
-    '91cb2a0a5ff73bf891c0e9c0010919ce40e5270b',
-    '787fbac28b826892bf60b3acb6f403ef8d969c71',
-    '57889790ca83ae87e45575a4383a0f5617c9ecae',
-    '70913704eac62e015795a5391f86a855026aa366',
-    '59df43dc401e045f2fde02f8823a1b41812d6b44',
-    '57218616997f69ccb0e173a360414a73855ac929',
-    'b265a9296bb048225f99ca3e37c54c78b3bb0b19',
-    '9e13042b6cddcee5bca627288e58a678828b7562',
-    'ba925650aa5fc0261b1c03c2c1287384c0f371fd',
-    'a4c3946a4762032230879ffd3e6f314db61daf38',
-    '4bb927422a6487ce79f2aca209c218a307e8a48f',
-    '013e420829a3a4871ae2f52d4f07119ada4ec753',
-    'a07fa87c437ca9e9d28582106809833d8f2f2fde',
     # - 'reference', 'counterPartyUid', 'counterPartySubEntityUid'
     '2a3479effdadb60c689230ff31f2f88989eb6c4b',
     '72633050b8afb1f11170b19f64c6dbdef4c106bd',
@@ -461,8 +437,12 @@ def dump_item(item):
                 violations.append('Transaction time %s greater than update time %s' % (transaction_time, update_time))
 
         if prev_payload is not None:
+            settling = prev_payload['status'] == 'PENDING' and payload['status'] == 'SETTLED'
             if not StuffChangedExceptions.get_max(version):
-                for c in deep_compare(prev_payload, payload, IGNORE_CHANGES):
+                ignorable = IGNORE_CHANGES
+                if settling:
+                    ignorable = IGNORE_CHANGES_ON_SETTLEMENT
+                for c in deep_compare(prev_payload, payload, ignorable):
                     violations.append('%s changed between versions' % c)
             # This actually happens, apparently legitimately, for unexplained reasons
             # if len(deep_compare(prev_payload, payload, {'updatedAt': None})) == 0:
@@ -472,7 +452,7 @@ def dump_item(item):
                 violations.append('updatedAt went backwards')
 
             settled = False
-            if prev_payload['status'] == 'PENDING' and payload['status'] == 'SETTLED':
+            if settling:
                 settled = True
             elif prev_payload['status'] == 'UPCOMING' and payload['status'] == 'SETTLED':
                 settled = True
