@@ -231,6 +231,20 @@ class LastUpdateDelay(MaxValuePolicy):
         '932515816d7c228f1246b700c665ced9bb7e594f': datetime.timedelta(days=1024),
         # Single transaction, updatedAt changed 8 months later.
         'a70c6ff47052ef59858c801d96030091a131d596': datetime.timedelta(days=238),
+        # Several payments to the same payee had their updatedAt fields
+        # changed with no other visible changes. I happen to remember that
+        # I did a payee name check at this time, so we now know that such
+        # things have that effect!
+        '97017fc832a948e718d38e0afd6cc0d94a5c3cf9': datetime.timedelta(days=998),
+        # 2 transactions from TVMs at separate stations with updatedAt nonsense.
+        '3dd142cce650b10dcdf862830d28af4f3adf4d6b': datetime.timedelta(days=778),
+        # more single transactions with updatedAt as sole change much later.
+        '5dcf9751ba8239c645bbcb027d9150074701232a': datetime.timedelta(days=1118),
+        '509573385de3197634c7a0bc34c2f66a3c9a4377': datetime.timedelta(days=1073),
+        '00562c5ca9aba6f7773bbfdd9371a0132fa05f65': datetime.timedelta(days=258),
+        '00da3abc8c4500f99e7ad5f8f24e97f2e25a4e8e': datetime.timedelta(days=217),
+        'e074b78454427bf1a9f3568539a5c99b256098e7': datetime.timedelta(days=92),
+        'c691b0d7576976c0472de390d6ba4f1c831e8a03': datetime.timedelta(days=99),
     }
 
 class LastUpdateWarningDelay(LastUpdateDelay):
@@ -335,6 +349,10 @@ WHITELISTED_COMMITS = {
     '54a5c44d994c761a6e43d4687af1502de285f231',  # merchant completely renamed!
     # Transaction was updated 16 seconds before it happened.
     '4e539110884299410451444f52e40e325ef5f28e',
+    # On 2022-06-29 a new field 'batchPaymentDetails' was
+    # introduced and mass-backfilled. In this commit, only
+    # that field was updated.
+    '5dcd6abe46ee633424235ab16d5d32e5a65e1d8a',
 }
 
 
