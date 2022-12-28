@@ -55,9 +55,11 @@ def import_starling():
     r = api("/api/v2/accounts")
     accounts = r['accounts']
     for account in accounts:
-        id = account['accountUid']
-        category = account['defaultCategory']
-        feed(api, id, category)
+        account_id = account['accountUid']
+        feed(api, account_id, account['defaultCategory'])
+        r = api("/api/v2/account/%s/spaces" % (account_id,))
+        for space in r['savingsGoals']:
+            feed(api, account_id, space['savingsGoalUid'])
 
 
 def main():
